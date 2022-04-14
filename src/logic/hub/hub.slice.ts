@@ -20,23 +20,28 @@ export const hubSlice = createSlice({
   name: 'hub',
   initialState: initialState,
   reducers: {
+    // hub
     initialize: () => undefined,
-    initializeColorSensor: (_state, _action: PayloadAction<{ hubId: string }>) => undefined,
+    addConnectedHub: (state, action: PayloadAction<{ hubId: string }>) => {
+      const { hubId } = action.payload;
+      state.connected[hubId] = true;
+    },
+    // motor
     changeSpeedBy: (_state, _action: PayloadAction<{ hubId: HubUUID; by: number }>) => undefined,
     changeSpeedTo: (_state, _action: PayloadAction<{ hubId: HubUUID; to: number }>) => undefined,
     setSpeed: (state, action: PayloadAction<{ hubId: HubUUID; speed: number }>) => {
       const { hubId, speed } = action.payload;
       state[hubId].speed = speed;
     },
-    addConnectedHub: (state, action: PayloadAction<{ hubId: string }>) => {
-      const { hubId } = action.payload;
-      state.connected[hubId] = true;
-    },
+    // led
     changeLamp: (_state, _action: PayloadAction<{ hubId: HubUUID; color: Color }>) => undefined,
     setLampColor: (state, action: PayloadAction<{ hubId: HubUUID; color: Color }>) => {
       const { hubId, color } = action.payload;
       state[hubId].color = color;
     },
+    // color sensor
+    initializeColorSensor: (_state, _action: PayloadAction<{ hubId: string }>) => undefined,
+    colorDetected: (_state, _action: PayloadAction<{ hubId: string; color: Color }>) => undefined,
     setColorSensor: (state, action: PayloadAction<{ hubId: string; color: Color }>) => {
       const { hubId, color } = action.payload;
       state[hubId as HubUUID].detectedColors.push(color);

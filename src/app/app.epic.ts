@@ -1,5 +1,5 @@
 import { combineEpics } from 'redux-observable';
 import { keyboard } from '../logic/keypress/keypress.epic';
-import { hubEpic } from '../logic/hub/hub.epic';
+import { hubEpics } from '../logic/hub/hub.epic';
 
-export const appEpic$ = combineEpics(keyboard, hubEpic);
+export const appEpic$ = combineEpics(keyboard, hubEpics);

@@ -9,7 +9,7 @@ export const hubApi = {
     return { hubId, speed };
   },
   setLight: async (hubId: HubUUID, color: Color) => {
-    getHubLED(hubId)?.setColor(color);
+    // getHubLED(hubId)?.setColor(color);
     return { hubId, color };
   },
   getColorSensorDevice: async (hubId: string) => {
