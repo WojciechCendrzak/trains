@@ -1,7 +1,7 @@
 import { BaseHub } from 'node-poweredup';
 import { combineEpics } from 'redux-observable';
 import { from, fromEventPattern, of } from 'rxjs';
-import { filter, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { filter, ignoreElements, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../../app/app.epics.type';
 import { hubSlice } from '../hub.slice';
 
@@ -31,9 +31,16 @@ const initialize: RootEpic = (actions$, _, { hubApi }) =>
     )
   );
 
+const logState: RootEpic = (actions$, state$) =>
+  actions$.pipe(
+    filter(hubSlice.actions.logState.match),
+    tap(() => console.log(state$.value)),
+    ignoreElements()
+  );
+
 const connectHub = async (hub: BaseHub) => {
   await hub.connect();
   return hub;
 };
 
-export const initializeEpics = combineEpics(initialize);
+export const initializeEpics = combineEpics(initialize, logState);

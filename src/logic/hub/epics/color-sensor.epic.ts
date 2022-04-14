@@ -46,10 +46,7 @@ const detectColorPairs: RootEpic = (actions$) =>
           | Color
           | undefined
         )[]),
-        map((colorPair) => ({
-          hubId: group$.key,
-          colorPair,
-        }))
+        map((colorPair) => ({ hubId: group$.key, colorPair }))
       )
     ),
     log('pair detected'),

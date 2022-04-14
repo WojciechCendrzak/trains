@@ -27,6 +27,7 @@ export const hubSlice = createSlice({
       const { hubId } = action.payload;
       state.connected[hubId] = true;
     },
+    logState: () => undefined,
     // motor
     changeSpeedBy: (_state, _action: PayloadAction<{ hubId: HubUUID; by: number }>) => undefined,
     changeSpeedTo: (_state, _action: PayloadAction<{ hubId: HubUUID; to: number }>) => undefined,

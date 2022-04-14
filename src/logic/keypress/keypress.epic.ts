@@ -93,6 +93,18 @@ const light: RootEpic = (actions$) =>
     })
   );
 
+const other: RootEpic = (actions$) =>
+  actions$.pipe(
+    filter(keyboardSlice.actions.key.match),
+    mergeMap((action) => {
+      switch (action.payload.key) {
+        case 'l':
+          return of(hubSlice.actions.logState());
+      }
+      return EMPTY;
+    })
+  );
+
 const test: RootEpic = (actions$) =>
   actions$.pipe(
     filter(keyboardSlice.actions.key.match),
@@ -112,4 +124,4 @@ const handleExit = tap<string>((key) => {
 });
 const logKeyPress = tap(console.log);
 
-export const keyboard = combineEpics(initialize, motor1, motor2, light, test);
+export const keyboard = combineEpics(initialize, motor1, motor2, light, test, other);
