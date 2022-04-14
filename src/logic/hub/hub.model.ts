@@ -1,4 +1,5 @@
 import { HubTypeNames, Color, DuploTrainBaseSound } from 'node-poweredup/dist/node/consts';
+import { mapEnumToName } from '../../utils/enum';
 
 export { HubTypeNames, Color, DuploTrainBaseSound };
 
@@ -18,3 +19,9 @@ export enum Devies {
   DuploTrainBaseSpeedometer = 4,
   VoltageSensor = 5,
 }
+
+const colorNames = mapEnumToName(Color);
+
+export const getColorName = (color: Color) => colorNames[color];
+
+export type ColorChain = (Color | undefined)[];

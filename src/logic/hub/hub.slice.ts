@@ -4,14 +4,14 @@ import { Color, HubUUID } from './hub.model';
 const hubState = {
   speed: 0,
   color: 0,
-  detectedColors: [] as Color[],
-  detectedColorsPairs: [undefined, undefined] as (Color | undefined)[],
   status: '',
 };
 
 const initialState = {
-  [HubUUID.One]: hubState,
-  [HubUUID.Two]: hubState,
+  hubs: {
+    [HubUUID.One.toString()]: hubState,
+    [HubUUID.Two.toString()]: hubState,
+  },
   connected: {} as Record<string, boolean>,
 };
 
@@ -29,35 +29,24 @@ export const hubSlice = createSlice({
     },
     logState: () => undefined,
     // motor
-    changeSpeedBy: (_state, _action: PayloadAction<{ hubId: HubUUID; by: number }>) => undefined,
-    changeSpeedTo: (_state, _action: PayloadAction<{ hubId: HubUUID; to: number }>) => undefined,
-    setSpeed: (state, action: PayloadAction<{ hubId: HubUUID; speed: number }>) => {
+    changeSpeedBy: (_state, _action: PayloadAction<{ hubId: string; by: number }>) => undefined,
+    changeSpeedTo: (_state, _action: PayloadAction<{ hubId: string; to: number }>) => undefined,
+    setSpeed: (state, action: PayloadAction<{ hubId: string; speed: number }>) => {
       const { hubId, speed } = action.payload;
-      state[hubId].speed = speed;
+      state.hubs[hubId].speed = speed;
     },
     // led
-    changeLamp: (_state, _action: PayloadAction<{ hubId: HubUUID; color: Color }>) => undefined,
-    setLampColor: (state, action: PayloadAction<{ hubId: HubUUID; color: Color }>) => {
+    changeLamp: (_state, _action: PayloadAction<{ hubId: string; color: Color }>) => undefined,
+    setLampColor: (state, action: PayloadAction<{ hubId: string; color: Color }>) => {
       const { hubId, color } = action.payload;
-      state[hubId].color = color;
+      state.hubs[hubId].color = color;
     },
     // color sensor
     initializeColorSensor: (_state, _action: PayloadAction<{ hubId: string }>) => undefined,
     colorDetected: (_state, _action: PayloadAction<{ hubId: string; color: Color }>) => undefined,
-    setColorSensor: (state, action: PayloadAction<{ hubId: string; color: Color }>) => {
-      const { hubId, color } = action.payload;
-      state[hubId as HubUUID].detectedColors.push(color);
-    },
     colorPairsDetected: (
       _state,
       _action: PayloadAction<{ hubId: string; colorPair: (Color | undefined)[] }>
     ) => undefined,
-    setDetectedColorsPair: (
-      state,
-      action: PayloadAction<{ hubId: string; colorPair: (Color | undefined)[] }>
-    ) => {
-      const { hubId, colorPair } = action.payload;
-      state[hubId as HubUUID].detectedColorsPairs = colorPair;
-    },
   },
 });

@@ -10,7 +10,7 @@ const changeSpeedBy: RootEpic = (actions$, state$, { hubApi }) =>
   actions$.pipe(
     filter(hubSlice.actions.changeSpeedBy.match),
     map(({ payload: { hubId, by } }) => ({ hubId, by })),
-    map(({ hubId, by }) => ({ hubId, speed: add(state$.value.hub[hubId].speed, by) })),
+    map(({ hubId, by }) => ({ hubId, speed: add(state$.value.hub.hubs[hubId].speed, by) })),
     managed(mergeMap(({ hubId, speed }) => from(hubApi.setSepped(hubId, speed)))),
     map(({ hubId, speed }) => hubSlice.actions.setSpeed({ hubId, speed }))
   );

@@ -1,9 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Color, HubUUID } from '../hub/hub.model';
+import { ColorChain, HubUUID } from '../hub/hub.model';
 
-export type Semaphores = Record<Color, string>;
+export type Semaphores = Record<string, string>;
+
+const hub = {
+  currentZone: undefined as string | undefined,
+  waitForZone: undefined as string | undefined,
+};
+
 const initialState = {
-  semaphors: {} as Semaphores,
+  whoBlocks: {} as Semaphores,
+  whoWaits: {} as Semaphores,
+  [HubUUID.One.toString()]: hub,
+  [HubUUID.Two.toString()]: hub,
 };
 
 export type CircleState = typeof initialState;
@@ -12,8 +21,28 @@ export const circleSlice = createSlice({
   name: 'circle',
   initialState: initialState,
   reducers: {
-    colorDetected: (_state, _action: PayloadAction<{ hubId: string; color: Color }>) => undefined,
-    enter: (_state, _action: PayloadAction<{ hubId: string; color: Color }>) => undefined,
-    waitFor: (_state, _action: PayloadAction<{ hubId: string; color: Color }>) => undefined,
+    colorChainDetected: (_state, _action: PayloadAction<{ hubId: string; colors: ColorChain }>) =>
+      undefined,
+    enterZone: (_state, _action: PayloadAction<{ hubId: string; zoneKey: string }>) => undefined,
+    waitForZone: (state, action: PayloadAction<{ hubId: string; zoneKey: string }>) => {
+      const { hubId, zoneKey } = action.payload;
+      state.whoWaits[zoneKey] = hubId;
+      state[hubId].waitForZone = zoneKey;
+    },
+    unWaitForZone: (state, action: PayloadAction<{ hubId: string; zoneKey: string }>) => {
+      const { zoneKey, hubId } = action.payload;
+      delete state.whoWaits[zoneKey];
+      state[hubId].waitForZone = undefined;
+    },
+    blockZone: (state, action: PayloadAction<{ hubId: string; zoneKey: string }>) => {
+      const { hubId, zoneKey } = action.payload;
+      state.whoBlocks[zoneKey] = hubId;
+      state[hubId].currentZone = zoneKey;
+    },
+    unblockZone: (state, action: PayloadAction<{ hubId: string; zoneKey: string }>) => {
+      const { zoneKey, hubId } = action.payload;
+      delete state.whoBlocks[zoneKey];
+      state[hubId].currentZone = undefined;
+    },
   },
 });

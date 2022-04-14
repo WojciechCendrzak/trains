@@ -1,19 +1,64 @@
 import { combineEpics } from 'redux-observable';
-import { from, fromEventPattern, pipe } from 'rxjs';
-import { filter, groupBy, map, mergeMap, pluck, scan, switchMap, tap } from 'rxjs/operators';
+import { from, of } from 'rxjs';
+import { filter, map, pluck, switchMap } from 'rxjs/operators';
 import { RootEpic } from '../../app/app.epics.type';
-import { canEnter } from './circle.logic';
+import { MAX_SPEED } from '../hub/hub.model';
+import { hubSlice } from '../hub/hub.slice';
+import { canEnter, getZoneKey } from './circle.logic';
+import { whoWaitForZoneSelector } from './circle.selector';
 import { circleSlice } from './circle.slice';
 
 const colorDetected: RootEpic = (actions$, state$) =>
   actions$.pipe(
-    filter(circleSlice.actions.colorDetected.match),
+    filter(circleSlice.actions.colorChainDetected.match),
     pluck('payload'),
-    map(({ hubId, color }) =>
-      canEnter(state$.value.circle.semaphors, hubId, color)
-        ? circleSlice.actions.enter({ hubId, color })
-        : circleSlice.actions.waitFor({ hubId, color })
+    map((payload) => ({ ...payload, zoneKey: getZoneKey(payload.colors) })),
+    map(({ hubId, zoneKey }) =>
+      canEnter(state$.value.circle.whoBlocks, hubId, zoneKey)
+        ? circleSlice.actions.enterZone({ hubId, zoneKey })
+        : circleSlice.actions.waitForZone({ hubId, zoneKey })
     )
   );
 
-export const circleEpics = combineEpics(colorDetected);
+const enterZone: RootEpic = (actions$, state$) =>
+  actions$.pipe(
+    filter(circleSlice.actions.enterZone.match),
+    pluck('payload'),
+    map((payload) => ({ ...payload, currentZone: state$.value.circle[payload.hubId].currentZone })),
+    switchMap(({ hubId, zoneKey, currentZone }) =>
+      of(
+        ...(currentZone
+          ? [
+              circleSlice.actions.unblockZone({
+                hubId,
+                zoneKey: currentZone,
+              }),
+            ]
+          : []),
+        circleSlice.actions.blockZone({ hubId, zoneKey }),
+        hubSlice.actions.setSpeed({ hubId, speed: MAX_SPEED })
+      )
+    )
+  );
+
+const unblockZone: RootEpic = (actions$, state$) =>
+  actions$.pipe(
+    filter(circleSlice.actions.unblockZone.match),
+    pluck('payload'),
+    switchMap(({ zoneKey }) =>
+      from(
+        whoWaitForZoneSelector(zoneKey)(state$.value).map((hubId) =>
+          circleSlice.actions.enterZone({ hubId, zoneKey })
+        )
+      )
+    )
+  );
+
+const waitForZone: RootEpic = (actions$) =>
+  actions$.pipe(
+    filter(circleSlice.actions.waitForZone.match),
+    pluck('payload'),
+    switchMap(({ hubId }) => of(hubSlice.actions.setSpeed({ hubId, speed: 0 })))
+  );
+
+export const circleEpics = combineEpics(colorDetected, enterZone, unblockZone, waitForZone);

@@ -110,8 +110,12 @@ const test: RootEpic = (actions$) =>
     filter(keyboardSlice.actions.key.match),
     mergeMap((action) => {
       switch (action.payload.key) {
-        case 'd':
+        case 'e':
           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.GREEN }));
+        case 'r':
+          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.BLUE }));
+        case 'd':
+          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.GREEN }));
         case 'f':
           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.BLUE }));
       }
