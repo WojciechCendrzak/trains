@@ -13,6 +13,7 @@ export const start = () => {
     const newState = store.getState();
     const d = diff(prevState, newState);
     if (!isEmpty(d)) console.log(d);
+    prevState = newState;
   });
   store.dispatch(keyboardSlice.actions.initialize());
   store.dispatch(hubSlice.actions.initialize());
