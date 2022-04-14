@@ -47,6 +47,10 @@ export const hubSlice = createSlice({
       const { hubId, color } = action.payload;
       state[hubId as HubUUID].detectedColors.push(color);
     },
+    colorPairsDetected: (
+      _state,
+      _action: PayloadAction<{ hubId: string; colorPair: (Color | undefined)[] }>
+    ) => undefined,
     setDetectedColorsPair: (
       state,
       action: PayloadAction<{ hubId: string; colorPair: (Color | undefined)[] }>

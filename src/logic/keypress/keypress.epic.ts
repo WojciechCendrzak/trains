@@ -101,7 +101,7 @@ const test: RootEpic = (actions$) =>
         case 'd':
           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.GREEN }));
         case 'f':
-          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.BLUE }));
+          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.BLUE }));
       }
       return EMPTY;
     })

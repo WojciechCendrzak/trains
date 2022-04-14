@@ -3,6 +3,7 @@ import { from, fromEventPattern, pipe } from 'rxjs';
 import { filter, groupBy, map, mergeMap, scan, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../../app/app.epics.type';
 import { managed } from '../../../operators/managed.operator';
+import { log } from '../../../utils/log';
 import { Color } from '../hub.model';
 import { hubSlice } from '../hub.slice';
 
@@ -34,7 +35,7 @@ const colorDetected: RootEpic = (actions$) =>
     map(({ payload: { hubId, color } }) => hubSlice.actions.setColorSensor({ hubId, color }))
   );
 
-const setDetectedColorsPairs: RootEpic = (actions$) =>
+const detectColorPairs: RootEpic = (actions$) =>
   actions$.pipe(
     filter(hubSlice.actions.colorDetected.match),
     map(({ payload }) => payload),
@@ -51,11 +52,20 @@ const setDetectedColorsPairs: RootEpic = (actions$) =>
         }))
       )
     ),
+    log('pair detected'),
+    map(({ hubId, colorPair }) => hubSlice.actions.colorPairsDetected({ hubId, colorPair }))
+  );
+
+const colorPairsDetected: RootEpic = (actions$) =>
+  actions$.pipe(
+    filter(hubSlice.actions.colorPairsDetected.match),
+    map(({ payload }) => payload),
     map(({ hubId, colorPair }) => hubSlice.actions.setDetectedColorsPair({ hubId, colorPair }))
   );
 
 export const colorSensorEpics = combineEpics(
   initializeColorSensor,
   colorDetected,
-  setDetectedColorsPairs
+  detectColorPairs,
+  colorPairsDetected
 );
