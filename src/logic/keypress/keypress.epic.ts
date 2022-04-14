@@ -21,7 +21,7 @@ const initialize: RootEpic = (actions$) =>
         (handler) => process.stdin.removeListener('keypress', handler)
       )
     ),
-    logKeyPress,
+    // logKeyPress,
     map(([ch, chObj]) => ({ ...chObj, key: ch || chObj.name })),
     map(({ key }) => key),
     handleExit,

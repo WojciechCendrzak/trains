@@ -5,7 +5,7 @@ const poweredUP = new PoweredUP();
 
 export const hubApi = {
   setSepped: async (hubId: HubUUID, speed: number) => {
-    getMotor(hubId)?.setPower(speed);
+    // getMotor(hubId)?.setPower(speed);
     return { hubId, speed };
   },
   setLight: async (hubId: HubUUID, color: Color) => {
