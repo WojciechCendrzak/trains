@@ -5,6 +5,7 @@ const hubState = {
   speed: 0,
   color: 0,
   detectedColors: [] as Color[],
+  detectedColorsPairs: [undefined, undefined] as (Color | undefined)[],
   status: '',
 };
 
@@ -45,6 +46,13 @@ export const hubSlice = createSlice({
     setColorSensor: (state, action: PayloadAction<{ hubId: string; color: Color }>) => {
       const { hubId, color } = action.payload;
       state[hubId as HubUUID].detectedColors.push(color);
+    },
+    setDetectedColorsPair: (
+      state,
+      action: PayloadAction<{ hubId: string; colorPair: (Color | undefined)[] }>
+    ) => {
+      const { hubId, colorPair } = action.payload;
+      state[hubId as HubUUID].detectedColorsPairs = colorPair;
     },
   },
 });

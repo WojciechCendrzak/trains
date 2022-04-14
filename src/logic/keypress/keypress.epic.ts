@@ -1,6 +1,6 @@
 import { combineEpics } from 'redux-observable';
 import { EMPTY, fromEventPattern, of } from 'rxjs';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../app/app.epics.type';
 import { Color, HubUUID, MAX_SPEED, STEP } from '../hub/hub.model';
 import { hubSlice } from '../hub/hub.slice';
@@ -93,9 +93,23 @@ const light: RootEpic = (actions$) =>
     })
   );
 
+const test: RootEpic = (actions$) =>
+  actions$.pipe(
+    filter(keyboardSlice.actions.key.match),
+    mergeMap((action) => {
+      switch (action.payload.key) {
+        case 'd':
+          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.GREEN }));
+        case 'f':
+          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.BLUE }));
+      }
+      return EMPTY;
+    })
+  );
+
 const handleExit = tap<string>((key) => {
   if (key == 'q') process.exit();
 });
 const logKeyPress = tap(console.log);
 
-export const keyboard = combineEpics(initialize, motor1, motor2, light);
+export const keyboard = combineEpics(initialize, motor1, motor2, light, test);
