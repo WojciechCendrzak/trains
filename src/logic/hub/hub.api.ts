@@ -1,15 +1,15 @@
 import PoweredUP, { DuploTrainBaseColorSensor, DuploTrainBaseMotor, HubLED } from 'node-poweredup';
-import { Color, Devies, HubUUID } from './hub.model';
+import { Color, Devies } from './hub.model';
 
 const poweredUP = new PoweredUP();
 
 export const hubApi = {
   setSepped: async (hubId: string, speed: number) => {
-    // getMotor(hubId)?.setPower(speed);
+    getMotor(hubId)?.setPower(speed);
     return { hubId, speed };
   },
   setLight: async (hubId: string, color: Color) => {
-    // getHubLED(hubId)?.setColor(color);
+    getHubLED(hubId)?.setColor(color);
     return { hubId, color };
   },
   getColorSensorDevice: async (hubId: string) => {

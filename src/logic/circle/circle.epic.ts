@@ -36,7 +36,7 @@ const enterZone: RootEpic = (actions$, state$) =>
             ]
           : []),
         circleSlice.actions.blockZone({ hubId, zoneKey }),
-        hubSlice.actions.setSpeed({ hubId, speed: MAX_SPEED })
+        hubSlice.actions.changeSpeedTo({ hubId, to: MAX_SPEED })
       )
     )
   );
@@ -58,7 +58,7 @@ const waitForZone: RootEpic = (actions$) =>
   actions$.pipe(
     filter(circleSlice.actions.waitForZone.match),
     pluck('payload'),
-    switchMap(({ hubId }) => of(hubSlice.actions.setSpeed({ hubId, speed: 0 })))
+    map(({ hubId }) => hubSlice.actions.changeSpeedTo({ hubId, to: 0 }))
   );
 
 export const circleEpics = combineEpics(colorDetected, enterZone, unblockZone, waitForZone);
