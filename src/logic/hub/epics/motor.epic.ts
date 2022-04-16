@@ -1,27 +1,34 @@
 import { combineEpics } from 'redux-observable';
 import { from } from 'rxjs';
-import { filter, map, mergeMap } from 'rxjs/operators';
+import { filter, map, mergeMap, pluck } from 'rxjs/operators';
 import { RootEpic } from '../../../app/app.epics.type';
 import { managed } from '../../../operators/managed.operator';
 import { MAX_SPEED } from '../hub.model';
 import { hubSlice } from '../hub.slice';
 
-const changeSpeedBy: RootEpic = (actions$, state$, { hubApi }) =>
+const changeSpeedBy: RootEpic = (actions$, state$) =>
   actions$.pipe(
     filter(hubSlice.actions.changeSpeedBy.match),
-    map(({ payload: { hubId, by } }) => ({ hubId, by })),
+    pluck('payload'),
     map(({ hubId, by }) => ({ hubId, speed: add(state$.value.hub.hubs[hubId].currentSpeed, by) })),
-    managed(mergeMap(({ hubId, speed }) => from(hubApi.setSepped(hubId, speed)))),
-    map(({ hubId, speed }) => hubSlice.actions.setSpeed({ hubId, speed }))
+    map(({ hubId, speed }) => hubSlice.actions.changeSpeedTo({ hubId, to: speed }))
   );
 
 const add = (speed: number, by: number) => Math.min(Math.max(speed + by, -MAX_SPEED), MAX_SPEED);
 
-const changeSpeedTo: RootEpic = (actions$, _, { hubApi }) =>
+const changeSpeedTo: RootEpic = (actions$, state$, { hubApi }) =>
   actions$.pipe(
     filter(hubSlice.actions.changeSpeedTo.match),
-    map(({ payload: { hubId, to } }) => ({ hubId, to })),
-    managed(mergeMap(({ hubId, to }) => from(hubApi.setSepped(hubId, to)))),
+    pluck('payload'),
+    map(({ hubId, to }) => ({
+      hubId,
+      fromSpeed: state$.value.hub.hubs[hubId].lastSpeed,
+      toSpeed: to,
+    })),
+    managed(
+      mergeMap(({ hubId, fromSpeed, toSpeed }) => from(hubApi.rampSpeed(hubId, fromSpeed, toSpeed)))
+      // managed(mergeMap(({ hubId, toSpeed }) => from(hubApi.setSpeed(hubId, toSpeed))))
+    ),
     map(({ hubId, speed }) => hubSlice.actions.setSpeed({ hubId, speed }))
   );
 

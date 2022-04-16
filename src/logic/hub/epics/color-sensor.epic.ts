@@ -3,8 +3,6 @@ import { from, fromEventPattern, pipe } from 'rxjs';
 import { filter, groupBy, map, mergeMap, scan, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../../app/app.epics.type';
 import { managed } from '../../../operators/managed.operator';
-import { log } from '../../../utils/log';
-import { circleSlice } from '../../circle/circle.slice';
 import { Color } from '../hub.model';
 import { hubSlice } from '../hub.slice';
 

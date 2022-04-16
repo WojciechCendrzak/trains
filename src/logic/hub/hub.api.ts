@@ -9,10 +9,16 @@ import { Devies } from './hub.model';
 
 const poweredUP = new PoweredUP();
 
+const RAMP_SPEED_TIME = 1000;
+
 export const hubApi = {
-  setSepped: async (hubId: string, speed: number) => {
+  setSpeed: async (hubId: string, speed: number) => {
     await getMotor(hubId)?.setPower(speed);
     return { hubId, speed };
+  },
+  rampSpeed: async (hubId: string, from: number, to: number) => {
+    await getMotor(hubId)?.rampPower(from, to, RAMP_SPEED_TIME);
+    return { hubId, speed: to };
   },
   setLight: async (hubId: string, color: Color) => {
     await getHubLED(hubId)?.setColor(color);
