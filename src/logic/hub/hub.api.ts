@@ -1,19 +1,31 @@
-import PoweredUP, { DuploTrainBaseColorSensor, DuploTrainBaseMotor, HubLED } from 'node-poweredup';
-import { Color, Devies } from './hub.model';
+import PoweredUP, {
+  DuploTrainBaseColorSensor,
+  DuploTrainBaseMotor,
+  DuploTrainBaseSpeaker,
+  HubLED,
+} from 'node-poweredup';
+import { Color, DuploTrainBaseSound } from 'node-poweredup/dist/node/consts';
+import { Devies } from './hub.model';
 
 const poweredUP = new PoweredUP();
 
 export const hubApi = {
   setSepped: async (hubId: string, speed: number) => {
-    getMotor(hubId)?.setPower(speed);
+    await getMotor(hubId)?.setPower(speed);
     return { hubId, speed };
   },
   setLight: async (hubId: string, color: Color) => {
-    getHubLED(hubId)?.setColor(color);
+    await getHubLED(hubId)?.setColor(color);
     return { hubId, color };
   },
   getColorSensorDevice: async (hubId: string) => {
     return getColorSensor(hubId);
+  },
+  playSound: async (hubId: string, sound: DuploTrainBaseSound) => {
+    await getSoundDevice(hubId)?.playSound(sound);
+  },
+  playTone: async (hubId: string, tone: number) => {
+    await getSoundDevice(hubId)?.playTone(tone);
   },
   poweredUP,
 };
@@ -28,6 +40,12 @@ const getHubLED = (hubId: string): HubLED => {
   const hub = poweredUP.getHubByUUID(hubId);
   if (!hub) throw `no hub ${hubId}`;
   return hub?.getDevices()[Devies.HubLED] as HubLED;
+};
+
+const getSoundDevice = (hubId: string): DuploTrainBaseSpeaker => {
+  const hub = poweredUP.getHubByUUID(hubId);
+  if (!hub) throw `no hub ${hubId}`;
+  return hub?.getDevices()[Devies.DuploTrainBaseSpeaker] as DuploTrainBaseSpeaker;
 };
 
 const getColorSensor = (hubId: string): DuploTrainBaseColorSensor => {

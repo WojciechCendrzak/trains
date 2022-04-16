@@ -2,7 +2,7 @@ import { combineEpics } from 'redux-observable';
 import { EMPTY, fromEventPattern, of } from 'rxjs';
 import { filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../app/app.epics.type';
-import { Color, HubUUID, NOMINAL_SPEED, STEP } from '../hub/hub.model';
+import { Color, DuploTrainBaseSound, HubUUID, MAX_SPEED, STEP } from '../hub/hub.model';
 import { hubSlice } from '../hub/hub.slice';
 import { KeyPress, keypress } from './keypress.api';
 import { keyboardSlice } from './keypress.slice';
@@ -38,9 +38,9 @@ const motor1: RootEpic = (actions$) =>
         case 'left':
           return of(hubSlice.actions.changeSpeedBy({ hubId: HubUUID.One, by: -STEP }));
         case 'up':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: NOMINAL_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: MAX_SPEED }));
         case 'down':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: -NOMINAL_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: -MAX_SPEED }));
         case ' ':
           return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: 0 }));
       }
@@ -58,9 +58,9 @@ const motor2: RootEpic = (actions$) =>
         case `'`:
           return of(hubSlice.actions.changeSpeedBy({ hubId: HubUUID.Two, by: -STEP }));
         case ']':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: NOMINAL_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: MAX_SPEED }));
         case '[':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: -NOMINAL_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: -MAX_SPEED }));
         case '\r':
           return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: 0 }));
       }
@@ -85,8 +85,13 @@ const light: RootEpic = (actions$) =>
           );
         case 'n':
           return of(
-            hubSlice.actions.changeLamp({ hubId: HubUUID.One, color: Color.LIGHT_BLUE }),
-            hubSlice.actions.changeLamp({ hubId: HubUUID.Two, color: Color.LIGHT_BLUE })
+            hubSlice.actions.changeLamp({ hubId: HubUUID.One, color: Color.BLUE }),
+            hubSlice.actions.changeLamp({ hubId: HubUUID.Two, color: Color.BLUE })
+          );
+        case 'b':
+          return of(
+            hubSlice.actions.changeLamp({ hubId: HubUUID.One, color: Color.YELLOW }),
+            hubSlice.actions.changeLamp({ hubId: HubUUID.Two, color: Color.YELLOW })
           );
       }
       return EMPTY;
@@ -105,27 +110,98 @@ const other: RootEpic = (actions$) =>
     })
   );
 
-const test: RootEpic = (actions$) =>
+const sounds: RootEpic = (actions$) =>
   actions$.pipe(
     filter(keyboardSlice.actions.key.match),
-    mergeMap((action) => {
+    switchMap((action) => {
       switch (action.payload.key) {
-        case 'e':
-          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.GREEN }));
-        case 'r':
-          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.BLUE }));
-        case 'd':
-          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.GREEN }));
-        case 'f':
-          return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.BLUE }));
+        case 'o':
+          return of(
+            hubSlice.actions.playSound({
+              hubId: HubUUID.One,
+              sound: DuploTrainBaseSound.STATION_DEPARTURE,
+            }),
+            hubSlice.actions.playSound({
+              hubId: HubUUID.Two,
+              sound: DuploTrainBaseSound.STATION_DEPARTURE,
+            })
+          );
+        case 's':
+          return of(
+            hubSlice.actions.playSound({
+              hubId: HubUUID.One,
+              sound: DuploTrainBaseSound.STEAM,
+            }),
+            hubSlice.actions.playSound({
+              hubId: HubUUID.Two,
+              sound: DuploTrainBaseSound.STEAM,
+            })
+          );
+        case 'h':
+          return of(
+            hubSlice.actions.playSound({
+              hubId: HubUUID.One,
+              sound: DuploTrainBaseSound.HORN,
+            }),
+            hubSlice.actions.playSound({
+              hubId: HubUUID.Two,
+              sound: DuploTrainBaseSound.HORN,
+            })
+          );
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+          return of(
+            hubSlice.actions.playTone({
+              hubId: HubUUID.One,
+              tone: parseInt(action.payload.key, 10),
+            }),
+            hubSlice.actions.playTone({
+              hubId: HubUUID.One,
+              tone: parseInt(action.payload.key, 10),
+            })
+          );
       }
       return EMPTY;
     })
   );
+
+// const test: RootEpic = (actions$) =>
+//   actions$.pipe(
+//     filter(keyboardSlice.actions.key.match),
+//     mergeMap((action) => {
+//       switch (action.payload.key) {
+//         case 'e':
+//           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.GREEN }));
+//         case 'r':
+//           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.One, color: Color.BLUE }));
+//         case 'd':
+//           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.GREEN }));
+//         case 'f':
+//           return of(hubSlice.actions.colorDetected({ hubId: HubUUID.Two, color: Color.BLUE }));
+//       }
+//       return EMPTY;
+//     })
+//   );
 
 const handleExit = tap<string>((key) => {
   if (key == 'q') process.exit();
 });
 const logKeyPress = tap(console.log);
 
-export const keyboard = combineEpics(initialize, motor1, motor2, light, test, other);
+export const keyboard = combineEpics(
+  initialize,
+  motor1,
+  motor2,
+  light,
+  //  test,
+  other,
+  sounds
+);

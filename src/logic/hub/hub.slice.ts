@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Color, HubUUID } from './hub.model';
+import { Color, DuploTrainBaseSound, HubUUID } from './hub.model';
 
 const hubState = {
   currentSpeed: 0,
@@ -44,5 +44,9 @@ export const hubSlice = createSlice({
       _state,
       _action: PayloadAction<{ hubId: string; colorPair: (Color | undefined)[] }>
     ) => undefined,
+    playSound: (_state, _action: PayloadAction<{ hubId: string; sound: DuploTrainBaseSound }>) =>
+      undefined,
+    playTone: (_state, _action: PayloadAction<{ hubId: string; tone: number }>) =>
+      undefined,
   },
 });
