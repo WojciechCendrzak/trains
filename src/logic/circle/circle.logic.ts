@@ -1,4 +1,4 @@
-import { omit, omitBy } from 'lodash';
+import { omitBy } from 'lodash';
 import { ColorChain, getColorName } from '../hub/hub.model';
 import { Semaphores } from './circle.slice';
 
@@ -33,7 +33,6 @@ export const zoneControl = (whoBloks: ZoneHubMap, whoWait: ZoneHubMap, zone: Zon
   if (!isBlocked(whoBloks, zone)) {
     res.whoBloks = unBlockAllMyZones(whoBloks, zone);
     res.whoBloks = block(res.whoBloks, zone);
-    // res.toRun.push(zone.hub);
     return res;
   }
 
@@ -43,12 +42,6 @@ export const zoneControl = (whoBloks: ZoneHubMap, whoWait: ZoneHubMap, zone: Zon
     res.toStop.push(zone.hub);
     return res;
   }
-
-  // // swich zone
-  // if (isBlocked(whoBloks, zone) && !iAmBloking(whoBloks, zone)) {
-  //   resWhoWait = wait(whoWait, zone);
-  //   toStop.push(zone.hub);
-  // }
 
   return res;
 };
@@ -68,25 +61,3 @@ export const wait = (whoWaits: ZoneHubMap, zone: Zone) => ({
 
 export const unBlockAllMyZones = (whoBloks: ZoneHubMap, zone: Zone) =>
   omitBy(whoBloks, (hubKye) => hubKye === zone.hub);
-
-// export const unBlockAllMyZones = (whoBloks: ZoneHubMap, zone: Zone) =>
-// Object.entries(whoBloks)
-//   .filter(([_, hubKey]) => hubKey === zone.hub)
-//   .reduce(
-//     (sum, [key, value]) => ({
-//       ...sum,
-//       [key]: value,
-//     }),
-//     {} as ZoneHubMap
-//   );
-
-// export const unBlockAllMyZones = (whoBloks: ZoneHubMap, zone: Zone) =>
-//   Object.entries(whoBloks)
-//     .filter(([_, hubKey]) => hubKey === zone.hub)
-//     .reduce(
-//       (sum, [key, value]) => ({
-//         ...sum,
-//         [key]: value,
-//       }),
-//       {} as ZoneHubMap
-//     );
