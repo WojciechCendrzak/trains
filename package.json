@@ -14,7 +14,6 @@
     "keypress": "^0.2.1",
     "lodash": "^4.17.21",
     "node-poweredup": "^8.0.5",
-    "redux-logger": "^3.0.6",
     "redux-observable": "^2.0.0",
     "rxjs": "7.5.5",
     "ts-jest": "^27.1.4"

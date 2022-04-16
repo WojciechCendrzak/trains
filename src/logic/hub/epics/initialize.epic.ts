@@ -4,6 +4,7 @@ import { from, fromEventPattern, of } from 'rxjs';
 import { filter, ignoreElements, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../../app/app.epics.type';
 import { hubSlice } from '../hub.slice';
+import { consoleLog } from '../../../utils/log';
 
 const initialize: RootEpic = (actions$, _, { hubApi }) =>
   actions$.pipe(
@@ -34,7 +35,7 @@ const initialize: RootEpic = (actions$, _, { hubApi }) =>
 const logState: RootEpic = (actions$, state$) =>
   actions$.pipe(
     filter(hubSlice.actions.logState.match),
-    tap(() => console.log(state$.value)),
+    tap(() => consoleLog(state$.value)),
     ignoreElements()
   );
 
