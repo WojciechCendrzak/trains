@@ -2,7 +2,7 @@ import { combineEpics } from 'redux-observable';
 import { EMPTY, fromEventPattern, of } from 'rxjs';
 import { filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../app/app.epics.type';
-import { Color, HubUUID, MAX_SPEED, STEP } from '../hub/hub.model';
+import { Color, HubUUID, NOMINAL_SPEED, STEP } from '../hub/hub.model';
 import { hubSlice } from '../hub/hub.slice';
 import { KeyPress, keypress } from './keypress.api';
 import { keyboardSlice } from './keypress.slice';
@@ -38,9 +38,9 @@ const motor1: RootEpic = (actions$) =>
         case 'left':
           return of(hubSlice.actions.changeSpeedBy({ hubId: HubUUID.One, by: -STEP }));
         case 'up':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: MAX_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: NOMINAL_SPEED }));
         case 'down':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: -MAX_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: -NOMINAL_SPEED }));
         case ' ':
           return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.One, to: 0 }));
       }
@@ -58,9 +58,9 @@ const motor2: RootEpic = (actions$) =>
         case `'`:
           return of(hubSlice.actions.changeSpeedBy({ hubId: HubUUID.Two, by: -STEP }));
         case ']':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: MAX_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: NOMINAL_SPEED }));
         case '[':
-          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: -MAX_SPEED }));
+          return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: -NOMINAL_SPEED }));
         case '\r':
           return of(hubSlice.actions.changeSpeedTo({ hubId: HubUUID.Two, to: 0 }));
       }

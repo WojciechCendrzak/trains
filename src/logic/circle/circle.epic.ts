@@ -2,7 +2,6 @@ import { combineEpics } from 'redux-observable';
 import { of } from 'rxjs';
 import { filter, map, pluck, switchMap } from 'rxjs/operators';
 import { RootEpic } from '../../app/app.epics.type';
-import { MAX_SPEED } from '../hub/hub.model';
 import { hubSlice } from '../hub/hub.slice';
 import { getZoneKey, zoneControl } from './circle.logic';
 import { circleSlice } from './circle.slice';
@@ -19,7 +18,9 @@ const colorDetected: RootEpic = (actions$, state$) =>
       return of(
         circleSlice.actions.setState({ whoBloks: res.whoBloks, whoWaits: res.whoWaits }),
         ...res.toStop.map((hubId) => hubSlice.actions.changeSpeedTo({ hubId, to: 0 })),
-        ...res.toRun.map((hubId) => hubSlice.actions.changeSpeedTo({ hubId, to: MAX_SPEED }))
+        ...res.toRun.map((hubId) =>
+          hubSlice.actions.changeSpeedTo({ hubId, to: state$.value.hub.hubs[hubId].lastSpeed })
+        )
       );
     })
   );
