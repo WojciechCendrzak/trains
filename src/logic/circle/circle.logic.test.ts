@@ -1,17 +1,6 @@
 import { Color } from '../hub/hub.model';
 import { getZoneKey, HubKey, zoneControl, ZoneKey } from './circle.logic';
 
-// describe(canEnter.name, () =>
-//   test.each`
-//     semaphore              | id     | zone      | expected
-//     ${{ blue: undefined }} | ${'1'} | ${'blue'} | ${true}
-//     ${{ blue: '1' }}       | ${'1'} | ${'blue'} | ${true}
-//     ${{ blue: '2' }}       | ${'1'} | ${'blue'} | ${false}
-//   `('$semaphore, $id, $zone -> $expected', ({ semaphore, id, zone, expected }) => {
-//     expect(canEnter(semaphore, id, zone)).toBe(expected);
-//   })
-// );
-
 describe(getZoneKey.name, () =>
   test.each`
     colors                                    | expected
@@ -180,9 +169,9 @@ const threeTrains3: TestCase = {
     key: 'D',
   },
   expected: {
-    whoBloks: { D: '1', A: '2', B: '2', C: '3' },
-    whoWaits: { B: '3' },
-    toRun: ['2'],
+    whoBloks: { D: '1', A: '2', B: '3' },
+    whoWaits: {},
+    toRun: ['2', '3'],
     toStop: [],
   },
 };
@@ -250,9 +239,103 @@ const twoZonesTwoTrain2: TestCase = {
     toStop: ['2'],
   },
 };
+const live1: TestCase = {
+  caseName: '6.1 - live',
+  whoBloks: {
+    WHITE: '97b483a4c1d62207779404fa1d1e9bfd',
+    GREEN: '10a90a2d2745f9efff0b0aee88750666',
+  },
+  whoWaits: { WHITE: '10a90a2d2745f9efff0b0aee88750666' },
+  zoneDetected: {
+    hub: '97b483a4c1d62207779404fa1d1e9bfd',
+    key: 'YELLOW',
+  },
+  expected: {
+    whoBloks: {
+      // GREEN: '10a90a2d2745f9efff0b0aee88750666', was error
+      YELLOW: '97b483a4c1d62207779404fa1d1e9bfd',
+      WHITE: '10a90a2d2745f9efff0b0aee88750666',
+    },
+    whoWaits: {},
+    toRun: ['10a90a2d2745f9efff0b0aee88750666'],
+    toStop: [],
+  },
+};
+
+const live1_1: TestCase = {
+  caseName: '6.1-1 simplified - live',
+  whoBloks: {
+    WHITE: '2', // running
+    GREEN: '1', // stopped and waiting for White
+  },
+  whoWaits: { WHITE: '1' },
+  zoneDetected: {
+    hub: '2',
+    key: 'YELLOW',
+  },
+  expected: {
+    whoBloks: {
+      // GREEN: '1', // bad - 1 should unblock GREEN
+      YELLOW: '2', // ok
+      WHITE: '1',
+    },
+    whoWaits: {},
+    toRun: ['1'],
+    toStop: [],
+  },
+};
+
+const live2: TestCase = {
+  caseName: '6.2 - live',
+  whoBloks: {
+    GREEN: '10a90a2d2745f9efff0b0aee88750666',
+    YELLOW: '97b483a4c1d62207779404fa1d1e9bfd',
+    WHITE: '10a90a2d2745f9efff0b0aee88750666',
+  },
+  whoWaits: {},
+  zoneDetected: {
+    hub: '10a90a2d2745f9efff0b0aee88750666',
+    key: 'YELLOW',
+  },
+  expected: {
+    whoBloks: {
+      GREEN: '10a90a2d2745f9efff0b0aee88750666',
+      YELLOW: '97b483a4c1d62207779404fa1d1e9bfd',
+      WHITE: '10a90a2d2745f9efff0b0aee88750666',
+    },
+    whoWaits: { YELLOW: '10a90a2d2745f9efff0b0aee88750666' },
+    toRun: [],
+    toStop: ['10a90a2d2745f9efff0b0aee88750666'],
+  },
+};
+const live3: TestCase = {
+  caseName: '6.3 - live',
+  whoBloks: {
+    GREEN: '10a90a2d2745f9efff0b0aee88750666',
+    YELLOW: '97b483a4c1d62207779404fa1d1e9bfd',
+    WHITE: '10a90a2d2745f9efff0b0aee88750666',
+  },
+  whoWaits: { YELLOW: '10a90a2d2745f9efff0b0aee88750666' },
+  zoneDetected: {
+    hub: '97b483a4c1d62207779404fa1d1e9bfd',
+    key: 'GREEN',
+  },
+  expected: {
+    whoBloks: {
+      GREEN: '10a90a2d2745f9efff0b0aee88750666',
+      YELLOW: '97b483a4c1d62207779404fa1d1e9bfd',
+      WHITE: '10a90a2d2745f9efff0b0aee88750666',
+    },
+    whoWaits: {
+      YELLOW: '10a90a2d2745f9efff0b0aee88750666',
+      GREEN: '97b483a4c1d62207779404fa1d1e9bfd',
+    },
+    toRun: [],
+    toStop: ['97b483a4c1d62207779404fa1d1e9bfd'],
+  },
+};
 
 describe.each([
-  //
   nothingBlockedCase,
   otherZoneBlockedCase,
   selfBlockedCase,
@@ -266,6 +349,10 @@ describe.each([
   oneZoneTwoTrain,
   twoZonesTwoTrain,
   twoZonesTwoTrain2,
+  live1_1,
+  live1,
+  live2,
+  live3,
 ])('', (testDate) => {
   describe(`${testDate.caseName} ${JSON.stringify(testDate)}`, () => {
     const { whoBloks, whoWaits: whoWait, zoneDetected, expected } = testDate;

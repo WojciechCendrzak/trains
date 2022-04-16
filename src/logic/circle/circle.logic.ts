@@ -1,9 +1,5 @@
 import { omitBy } from 'lodash';
 import { ColorChain, getColorName } from '../hub/hub.model';
-// import { Semaphores } from './circle.slice';
-
-// export const canEnter = (semaphores: Semaphores, hubId: string, zoneKey: string) =>
-//   !semaphores[zoneKey] || semaphores[zoneKey] === hubId;
 
 export const getZoneKey = (colors: ColorChain) =>
   colors.map((c) => (c !== undefined ? getColorName(c) : '_')).join('.');
@@ -18,7 +14,7 @@ export type ZoneKey = string;
 export type HubKey = string;
 
 export const zoneControl = (whoBloks: ZoneHubMap, whoWaits: ZoneHubMap, zone: Zone) => {
-  const res = {
+  let res = {
     whoBloks: { ...whoBloks },
     whoWaits: { ...whoWaits },
     toRun: [] as HubKey[],
@@ -39,18 +35,47 @@ export const zoneControl = (whoBloks: ZoneHubMap, whoWaits: ZoneHubMap, zone: Zo
 
   // can enter
   if (!isBlocked(whoBloks, zone)) {
-    res.whoBloks = unBlockAllMyZones(whoBloks, zone);
-    res.whoBloks = blockZone(res.whoBloks, zone);
-
-    const zoneBlockedByMe = getZoneKeyBlockedByMe(whoBloks, zone);
-    const waitingHub = zoneBlockedByMe && whoWaits[zoneBlockedByMe];
-    if (zoneBlockedByMe && waitingHub) {
-      res.whoWaits = unWait(whoWaits, waitingHub);
-      res.whoBloks = blockZone(res.whoBloks, { key: zoneBlockedByMe, hub: waitingHub });
-      res.toRun = [waitingHub];
-    }
+    res = blockZoneRecursive(res.whoBloks, res.whoWaits, zone, res.toRun, res.toStop);
 
     return res;
+  }
+
+  return res;
+};
+
+const blockZoneRecursive = (
+  whoBloks: ZoneHubMap,
+  whoWaits: ZoneHubMap,
+  zone: Zone,
+  toRun: HubKey[],
+  toStop: HubKey[]
+) => {
+  let res = {
+    whoBloks: { ...whoBloks },
+    whoWaits: { ...whoWaits },
+    toRun: [...toRun],
+    toStop: [...toStop],
+  };
+
+  res.whoBloks = unBlockAllMyZones(whoBloks, zone);
+  res.whoBloks = blockZone(res.whoBloks, zone);
+
+  const zoneBlockedByMe = getZoneKeyBlockedByMe(whoBloks, zone);
+  const waitingHub = zoneBlockedByMe && whoWaits[zoneBlockedByMe];
+
+  if (zoneBlockedByMe && waitingHub) {
+    res.whoWaits = unWait(whoWaits, waitingHub);
+    res.toRun.push(waitingHub);
+    res = blockZoneRecursive(
+      res.whoBloks,
+      res.whoWaits,
+      {
+        key: zoneBlockedByMe,
+        hub: waitingHub,
+      },
+      res.toRun,
+      res.toStop
+    );
   }
 
   return res;
