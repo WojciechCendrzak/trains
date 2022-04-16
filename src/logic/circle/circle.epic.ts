@@ -15,6 +15,7 @@ const colorDetected: RootEpic = (actions$, state$) =>
     switchMap(({ hubId, zoneKey }) => {
       const { whoBloks, whoWaits } = state$.value.circle;
       const res = zoneControl(whoBloks, whoWaits, { hub: hubId, key: zoneKey });
+
       return of(
         circleSlice.actions.setState({ whoBloks: res.whoBloks, whoWaits: res.whoWaits }),
         ...res.toStop.map((hubId) => hubSlice.actions.changeSpeedTo({ hubId, to: 0 })),
