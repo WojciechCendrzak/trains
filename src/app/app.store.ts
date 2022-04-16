@@ -5,6 +5,18 @@ import { reducers } from './app.reducers';
 import { appEpic$ } from './app.epic';
 import { EpicDependencies } from './app.epics.type';
 import { hubApi } from '../logic/hub/hub.api';
+// import { createLogger } from 'redux-logger';
+
+// const logger = createLogger({
+//   stateTransformer: () => undefined,
+//   actionTransformer: (action) => action.type,
+// });
+
+const log = (store: any) => (next: any) => (action: any) => {
+  console.log(`-> ${action.type} ${JSON.stringify(action.payload)} `);
+  // console.log(action)
+  next(action);
+};
 
 const epicDependencies: EpicDependencies = {
   hubApi,
@@ -16,7 +28,7 @@ const epicMiddleware = createEpicMiddleware<Action, Action>({
 
 export const store = configureStore({
   reducer: reducers,
-  middleware: [epicMiddleware],
+  middleware: [log, epicMiddleware],
 });
 
 epicMiddleware.run(appEpic$ as any);

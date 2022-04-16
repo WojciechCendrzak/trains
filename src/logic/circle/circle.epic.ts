@@ -10,9 +10,9 @@ import { circleSlice } from './circle.slice';
 
 const colorDetected: RootEpic = (actions$, state$) =>
   actions$.pipe(
-    filter(circleSlice.actions.colorChainDetected.match),
+    filter(hubSlice.actions.colorDetected.match),
     pluck('payload'),
-    map((payload) => ({ ...payload, zoneKey: getZoneKey(payload.colors) })),
+    map((payload) => ({ ...payload, zoneKey: getZoneKey([payload.color]) })),
     map(({ hubId, zoneKey }) =>
       canEnter(state$.value.circle.whoBlocks, hubId, zoneKey)
         ? circleSlice.actions.enterZone({ hubId, zoneKey })

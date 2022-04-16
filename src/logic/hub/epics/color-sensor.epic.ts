@@ -30,35 +30,42 @@ const initializeColorSensor: RootEpic = (actions$, _, { hubApi }) =>
     )
   );
 
-const detectColorPairs: RootEpic = (actions$) =>
-  actions$.pipe(
-    filter(hubSlice.actions.colorDetected.match),
-    map(({ payload }) => payload),
-    groupBy((p) => p.hubId),
-    mergeMap((group$) =>
-      group$.pipe(
-        scan(([_, curr], { color }) => [curr, color], [undefined, undefined] as (
-          | Color
-          | undefined
-        )[]),
-        map((colorPair) => ({ hubId: group$.key, colorPair }))
-      )
-    ),
-    log('pair detected'),
-    map(({ hubId, colorPair }) => hubSlice.actions.colorPairsDetected({ hubId, colorPair }))
-  );
+// const detectColorPairs: RootEpic = (actions$) =>
+//   actions$.pipe(
+//     filter(hubSlice.actions.colorDetected.match),
+//     map(({ payload }) => payload),
+//     groupBy((p) => p.hubId),
+//     mergeMap((group$) =>
+//       group$.pipe(
+//         scan(([_, curr], { color }) => [curr, color], [undefined, undefined] as (
+//           | Color
+//           | undefined
+//         )[]),
+//         map((colorPair) => ({ hubId: group$.key, colorPair }))
+//       )
+//     ),
+//     log('pair detected'),
+//     map(({ hubId, colorPair }) => hubSlice.actions.colorPairsDetected({ hubId, colorPair }))
+//   );
 
-const colorPairsDetected: RootEpic = (actions$) =>
-  actions$.pipe(
-    filter(hubSlice.actions.colorPairsDetected.match),
-    map(({ payload }) => payload),
-    map(({ hubId, colorPair }) =>
-      circleSlice.actions.colorChainDetected({ hubId, colors: colorPair })
-    )
-  );
+// const colorPairsDetected: RootEpic = (actions$) =>
+//   actions$.pipe(
+//     filter(hubSlice.actions.colorDetected.match),
+//     map(({ payload }) => payload),
+//     map(({ hubId, color }) => circleSlice.actions.colorChainDetected({ hubId, colors: [color] }))
+//   );
+
+// const colorPairsDetected: RootEpic = (actions$) =>
+//   actions$.pipe(
+//     filter(hubSlice.actions.colorPairsDetected.match),
+//     map(({ payload }) => payload),
+//     map(({ hubId, colorPair }) =>
+//       circleSlice.actions.colorChainDetected({ hubId, colors: colorPair })
+//     )
+//   );
 
 export const colorSensorEpics = combineEpics(
   initializeColorSensor,
-  detectColorPairs,
-  colorPairsDetected
+  // detectColorPairs,
+  // colorPairsDetected
 );

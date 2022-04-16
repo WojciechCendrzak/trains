@@ -13,7 +13,7 @@ export const start = () => {
     const newState = store.getState();
     const d = diff(prevState, newState);
     // if (!isEmpty(d)) console.log(d);
-    if (!isEmpty(d)) console.log(JSON.stringify(d, null, 2));
+    // if (!isEmpty(d)) console.log(JSON.stringify(d, null, 2));
     prevState = newState;
   });
   store.dispatch(keyboardSlice.actions.initialize());
