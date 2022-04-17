@@ -22,12 +22,12 @@ const changeSpeedTo: RootEpic = (actions$, state$, { hubApi }) =>
     pluck('payload'),
     map(({ hubId, to }) => ({
       hubId,
-      fromSpeed: state$.value.hub.hubs[hubId].lastSpeed,
+      fromSpeed: state$.value.hub.hubs[hubId].currentSpeed,
       toSpeed: to,
     })),
     managed(
-      mergeMap(({ hubId, fromSpeed, toSpeed }) => from(hubApi.rampSpeed(hubId, fromSpeed, toSpeed)))
-      // managed(mergeMap(({ hubId, toSpeed }) => from(hubApi.setSpeed(hubId, toSpeed))))
+      // mergeMap(({ hubId, fromSpeed, toSpeed }) => from(hubApi.rampSpeed(hubId, fromSpeed, toSpeed)))
+      managed(mergeMap(({ hubId, toSpeed }) => from(hubApi.setSpeed(hubId, toSpeed))))
     ),
     map(({ hubId, speed }) => hubSlice.actions.setSpeed({ hubId, speed }))
   );

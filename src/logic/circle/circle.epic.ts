@@ -1,15 +1,18 @@
 import { combineEpics } from 'redux-observable';
-import { of } from 'rxjs';
-import { filter, map, pluck, switchMap } from 'rxjs/operators';
+import { from, of } from 'rxjs';
+import { filter, map, mergeMap, pluck, switchMap } from 'rxjs/operators';
 import { RootEpic } from '../../app/app.epics.type';
+import { managed } from '../../operators/managed.operator';
+import { Color } from '../hub/hub.model';
 import { hubSlice } from '../hub/hub.slice';
 import { getZoneKey, zoneControl } from './circle.logic';
 import { circleSlice } from './circle.slice';
 
-const colorDetected: RootEpic = (actions$, state$) =>
+const circleControl: RootEpic = (actions$, state$) =>
   actions$.pipe(
     filter(hubSlice.actions.colorDetected.match),
     pluck('payload'),
+    filter(({ color }) => color !== Color.RED),
     map((payload) => ({ ...payload, zoneKey: getZoneKey([payload.color]) })),
     switchMap(({ hubId, zoneKey }) => {
       const { whoBloks, whoWaits } = state$.value.circle;
@@ -25,4 +28,17 @@ const colorDetected: RootEpic = (actions$, state$) =>
     })
   );
 
-export const circleEpics = combineEpics(colorDetected);
+const stopOnRedDetected: RootEpic = (actions$, _, { hubApi }) =>
+  actions$.pipe(
+    filter(hubSlice.actions.colorDetected.match),
+    pluck('payload'),
+    filter(({ color }) => color === Color.RED),
+    managed(mergeMap(({ hubId }) => from(hubApi.setSpeed(hubId, 0)))),
+    map(({ hubId, speed }) => hubSlice.actions.setSpeed({ hubId, speed }))
+  );
+
+export const circleEpics = combineEpics(
+  //
+  circleControl,
+  stopOnRedDetected
+);
