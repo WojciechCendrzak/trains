@@ -26,7 +26,7 @@ const changeSpeedTo: RootEpic = (actions$, state$, { hubApi }) =>
       toSpeed: to,
     })),
     managed(
-      // mergeMap(({ hubId, fromSpeed, toSpeed }) => from(hubApi.rampSpeed(hubId, fromSpeed, toSpeed)))
+      // mergeMap(({ hubId, fromSpeed, toSpeed }) => from(hubApi.rampSpeed(hubId, fromSpeed, toSpeed))),
       managed(mergeMap(({ hubId, toSpeed }) => from(hubApi.setSpeed(hubId, toSpeed))))
     ),
     map(({ hubId, speed }) => hubSlice.actions.setSpeed({ hubId, speed }))
