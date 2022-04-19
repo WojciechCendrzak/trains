@@ -5,7 +5,7 @@ import { RootEpic } from '../../app/app.epics.type';
 import { managed } from '../../operators/managed.operator';
 import { Color } from '../hub/hub.model';
 import { hubSlice } from '../hub/hub.slice';
-import { getZoneKey, zoneControl } from './circle.logic';
+import { getZoneKey, mapZoneKeyToColor, zoneControl } from './circle.logic';
 import { circleSlice } from './circle.slice';
 
 const circleControl: RootEpic = (actions$, state$) =>
@@ -21,8 +21,17 @@ const circleControl: RootEpic = (actions$, state$) =>
       return of(
         circleSlice.actions.setState({ whoBloks: res.whoBloks, whoWaits: res.whoWaits }),
         ...res.toStop.map((hubId) => hubSlice.actions.changeSpeedTo({ hubId, to: 0 })),
-        ...res.toRun.map((hubId) =>
-          hubSlice.actions.changeSpeedTo({ hubId, to: state$.value.hub.hubs[hubId].lastSpeed })
+        ...res.toRun.map(({ hub }) =>
+          hubSlice.actions.changeSpeedTo({
+            hubId: hub,
+            to: state$.value.hub.hubs[hub].lastSpeed,
+          })
+        ),
+        ...res.onZoneChange.map(({ hub, key }) =>
+          hubSlice.actions.changeLamp({
+            hubId: hub,
+            color: mapZoneKeyToColor(key),
+          })
         )
       );
     })
