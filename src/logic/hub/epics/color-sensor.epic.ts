@@ -3,7 +3,7 @@ import { from, fromEventPattern, pipe } from 'rxjs';
 import { filter, groupBy, map, mergeMap, scan, switchMap, tap } from 'rxjs/operators';
 import { RootEpic } from '../../../app/app.epics.type';
 import { managed } from '../../../operators/managed.operator';
-import { Color } from '../hub.model';
+import { Color, getColorName } from '../hub.model';
 import { hubSlice } from '../hub.slice';
 
 const initializeColorSensor: RootEpic = (actions$, _, { hubApi }) =>
@@ -20,7 +20,7 @@ const initializeColorSensor: RootEpic = (actions$, _, { hubApi }) =>
                 (handler) => colorSensor.removeListener('color', handler)
               );
             }),
-            tap(({ color }) => console.log(`color detected ${color}`)),
+            tap(({ color }) => console.log(`color detected ${getColorName(color)} (${color})`)),
             map(({ color }) => hubSlice.actions.colorDetected({ hubId, color }))
           )
         )
@@ -63,7 +63,7 @@ const initializeColorSensor: RootEpic = (actions$, _, { hubApi }) =>
 //   );
 
 export const colorSensorEpics = combineEpics(
-  initializeColorSensor,
+  initializeColorSensor
   // detectColorPairs,
   // colorPairsDetected
 );
