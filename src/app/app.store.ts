@@ -22,10 +22,7 @@ const epicMiddleware = createEpicMiddleware<Action, Action>({
 
 export const store = configureStore({
   reducer: reducers,
-  middleware: [
-    // log,
-    epicMiddleware
-  ],
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(epicMiddleware),
 });
 
 epicMiddleware.run(appEpic$ as any);
